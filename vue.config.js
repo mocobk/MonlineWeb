@@ -81,7 +81,7 @@ module.exports = {
         externalConfig: resolve('src/icons/svgo.yml')
       })
       .end()
-
+    
     // set preserveWhitespace
     config.module
       .rule('vue')
@@ -91,6 +91,14 @@ module.exports = {
         options.compilerOptions.preserveWhitespace = true
         return options
       })
+      .end()
+    
+    // set plain-text loader
+    config.module
+      .rule('plain-text')
+      .test(/(\.md)|(\.txt)$/)
+      .use('raw-loader')
+      .loader('raw-loader')
       .end()
 
     config

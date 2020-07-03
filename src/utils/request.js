@@ -8,7 +8,7 @@ import { Message } from "element-ui"
 
 let config = {
     baseURL: process.env.VUE_APP_BASE_API || "",
-    timeout: 5 * 1000, // Timeout
+    timeout: 10 * 1000, // Timeout
     // withCredentials: true, // Check cross-site Access-Control
 };
 
@@ -58,5 +58,12 @@ request.interceptors.response.use(
     }
 );
 
+export const delayRequest = (function () {
+    let timer = 0;
+    return function (callback, ms) {
+        clearTimeout(timer);
+        timer = setTimeout(callback, ms);
+    };
+})()
 
 export default request;

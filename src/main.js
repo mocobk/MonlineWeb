@@ -4,6 +4,8 @@ import App from './App.vue'
 import router from './router'
 import Element from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+
+import '@/styles/index.scss' // global css
 import './icons'  // 注册 svg-icon 全局组件
 
 Vue.use(Element)

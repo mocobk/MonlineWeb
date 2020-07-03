@@ -1,6 +1,6 @@
 <template>
     <VueAceEditor
-            height="300px"
+            height="100%"
             ref="python-editor"
             :content="content"
             :options="{
@@ -14,9 +14,10 @@
                 minLines: 12,
                 maxLines: 30,
             }"
-            :fontSize='14'
+            :fontSize='16'
             :lang="'python'"
             :theme="'monokai'"
+            @onChange="onChange"
             @init="editorInit">
     </VueAceEditor>
 </template>
@@ -28,8 +29,7 @@
         name: "PythonEdit",
         props: {
             content: {
-                type: String,
-                required: true
+                type: String
             }
         },
         components: {
@@ -41,8 +41,12 @@
                 require("brace/mode/python")
                 require("brace/snippets/python")
                 require("brace/theme/monokai")
+            },
+            onChange(edit){
+                this.$emit('editChange', edit.getValue())
             }
         }
+        
     }
 </script>
 

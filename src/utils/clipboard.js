@@ -17,8 +17,21 @@ function clipboardError() {
   })
 }
 
-export default function handleClipboard(text, event=document.body, success=clipboardSuccess, error=clipboardError) {
-  const clipboard = new Clipboard(event.target, {
+function clipboardEmpty() {
+  Vue.prototype.$message({
+    message: '复制失败！内容为空',
+    type: 'warning',
+    duration: 1500
+  })
+}
+
+export default function handleClipboard(text, event, success=clipboardSuccess, error=clipboardError) {
+  // debugger;
+  // const clipboard = new Clipboard(event.target, {
+  if (text === '') {
+    clipboardEmpty()
+  }
+  const clipboard = new Clipboard(document.body, {
     text: () => text
   })
   clipboard.on('success', () => {
@@ -29,6 +42,6 @@ export default function handleClipboard(text, event=document.body, success=clipb
     error()
     clipboard.destroy()
   })
-  console.log('======clipboard.onClick', clipboard.onClick)
+  // 下面这不能删，不然要点两次才能复制
   clipboard.onClick(event)
 }
