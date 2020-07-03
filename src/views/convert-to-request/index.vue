@@ -27,7 +27,7 @@
             </label-item>
             <python-edit
                 v-loading="loading"
-                element-loading-text="正在运行，请稍后..."
+                element-loading-text="正在加载，请稍后..."
                 element-loading-background="rgba(0, 0, 0, 0.5)"
                 :content="initCode"
                 @editChange="updateCode">
@@ -129,9 +129,11 @@
                 this.code = value
             },
             getCode() {
+                this.loading = true
                 convert(this.requestText).then(res => {
                     this.initCode = res.code
                     this.code = res.code
+                    this.loading = false
                 })
             },
             runCode() {
@@ -150,10 +152,6 @@
                     this.clear = false
                 })
             },
-            showHelp() {
-                const text = require('./component/help.md')
-                console.log(text)
-            }
         }
     }
 </script>
