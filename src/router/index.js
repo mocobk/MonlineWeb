@@ -8,7 +8,12 @@ const devRouters = [
         path: '/icon',
         name: 'icon',
         component: () => import('@/views/icons')
-    }
+    },
+    {
+        path: '/bang',
+        name: 'big-bang',
+        component: () => import('@/views/big-bang')
+    },
 ]
 
 const routes = [

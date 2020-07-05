@@ -7,8 +7,13 @@ import 'element-ui/lib/theme-chalk/index.css'
 
 import '@/styles/index.scss' // global css
 import './icons'  // 注册 svg-icon 全局组件
+import Vant from 'vant'
+import 'vant/lib/index.css';
+import VueTouch from 'vue-touch'
 
 Vue.use(Element)
+Vue.use(Vant)
+Vue.use(VueTouch, {name: 'v-touch'})
 
 /**
  开发环境下，Vue 会提供很多警告来帮你对付常见的错误与陷阱。
@@ -20,6 +25,6 @@ Vue.use(Element)
 Vue.config.productionTip = false
 
 new Vue({
-  router,
-  render: h => h(App)
+    router,
+    render: h => h(App)
 }).$mount('#app')
