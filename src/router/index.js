@@ -9,11 +9,6 @@ const devRouters = [
         name: 'icon',
         component: () => import('@/views/icons')
     },
-    {
-        path: '/bang',
-        name: 'big-bang',
-        component: () => import('@/views/big-bang')
-    },
 ]
 
 const routes = [
@@ -25,6 +20,12 @@ const routes = [
         // which is lazy-loaded when the route is visited.
         component: () => import('@/views/convert-to-request')
     },
+    {
+        path: '/bang',
+        name: 'big-bang',
+        component: () => import('@/views/big-bang')
+    },
+
 ];
 
 const router = new VueRouter({
