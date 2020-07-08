@@ -97,7 +97,6 @@
                 this.dialogShow = true
                 new Promise(resolve => {
                     let interval = setInterval(() => {
-                        console.log(this.$refs.textarea)
                         if (this.$refs.textarea) {
                             clearInterval(interval)
                             resolve()

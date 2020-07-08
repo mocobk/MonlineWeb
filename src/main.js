@@ -8,7 +8,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import '@/styles/index.scss' // global css
 import './icons'  // 注册 svg-icon 全局组件
 // import Vant from 'vant'
-import {Tag, Loading, Button, Dialog} from 'vant'
+import {Tag, Loading, Button, Dialog, Toast} from 'vant'
 import 'vant/lib/index.css';
 import loading from './directives/loading/directive'
 
@@ -17,6 +17,7 @@ Vue.use(Loading)
 Vue.use(Tag)
 Vue.use(Button)
 Vue.use(Dialog)
+Vue.use(Toast)
 Vue.use(loading)
 
 
