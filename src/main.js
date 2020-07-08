@@ -7,13 +7,18 @@ import 'element-ui/lib/theme-chalk/index.css'
 
 import '@/styles/index.scss' // global css
 import './icons'  // 注册 svg-icon 全局组件
-import Vant from 'vant'
+// import Vant from 'vant'
+import {Tag, Loading, Button, Dialog} from 'vant'
 import 'vant/lib/index.css';
-import VueTouch from 'vue-touch'
+import loading from './directives/loading/directive'
 
 Vue.use(Element)
-Vue.use(Vant)
-Vue.use(VueTouch, {name: 'v-touch'})
+Vue.use(Loading)
+Vue.use(Tag)
+Vue.use(Button)
+Vue.use(Dialog)
+Vue.use(loading)
+
 
 /**
  开发环境下，Vue 会提供很多警告来帮你对付常见的错误与陷阱。

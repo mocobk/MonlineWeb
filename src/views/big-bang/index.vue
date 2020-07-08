@@ -2,73 +2,120 @@
     <div class="container">
         <div class="content">
             <div class="header">
-
+                <van-button round color="rgb(32, 32, 32)" @click="showDialog">粘 贴</van-button>
+                <van-button round color="rgb(32, 32, 32)" @click="selectAll">全 选</van-button>
+                <van-button round color="rgb(32, 32, 32)" @click="inverseSelection">反 选</van-button>
+                <van-button round color="rgb(32, 32, 32)" @click="unselectAll">取 消</van-button>
+            
             </div>
-            <div class="main">
-                <van-tag
+            <div v-mo-loading="loading" mo-loading-background="rgb(93, 94, 96)">
+                <div class="main" ref="main">
+                    <van-tag
                         v-for="(item, index) in items"
                         :key="index"
+                        size="large"
                         :class="{'tag-selected': item.selected, 'tag-unselected': !item.selected}"
                         :number="index"
                         @touchstart="onTouchStart"
-                        @touchmove="onTouchMove"
-                >
-                    {{item.word}}
-                </van-tag>
-
+                        @touchmove.prevent="onTouchMove"
+                        @click="onClick"
+                    >
+                        {{item.word}}
+                    </van-tag>
+                
+                </div>
             </div>
+            
             <div class="footer">
-
+                <van-button v-show="selectedItems.length > 0" round color="rgb(32, 32, 32)" @click="copyText">复 制
+                </van-button>
+            
             </div>
         </div>
-
+        
+        <van-dialog v-model="dialogShow" title="粘贴文本" @confirm="text=textareaValue" show-cancel-button>
+            <label style="margin: .8rem; display: block">
+                    <textarea
+                        id="paste-textarea"
+                        ref="textarea"
+                        v-model="textareaValue"
+                        autocomplete="off"
+                        placeholder="请粘贴要爆炸的文本"
+                        rows="5"
+                        style="width: 100%; border: none">
+                    </textarea>
+            </label>
+        </van-dialog>
+    
+    
     </div>
 
 </template>
 
 <script>
+    import handleClipboard from '@/utils/clipboard'
+    import {getSplitWords} from '@/api/big-bang'
+    
     export default {
-        name: "BigBang",
+        name: 'BigBang',
         data() {
             return {
-                words: [
-                    '我',
-                    '是',
-                    '中国人',
-                    '，',
-                    '来自',
-                    '湖南',
-                    '，',
-                    '18566772480',
-                    '我',
-                    '是',
-                    '中国人',
-                    '，',
-                    '来自',
-                    '湖南',
-                    '，',
-                    '18566772480',
-                    '我',
-                    '是',
-                    '中国人',
-                    '，',
-                    '来自',
-                    '湖南',
-                    '，',
-                    '18566772480',
-                ],
+                textareaValue: '',
+                text: '',
+                words: [],
                 items: {},
-                startIndex: 0,
-                selectedItems: {},
-                selectMode: false
-
+                moveFirstIndex: 0,
+                movePreviousIndex: 0,
+                selectMode: false,
+                dialogShow: false,
+                isMounted: false,
+                loading: false
+                
             }
         },
-        computed: {},
+        computed: {
+            selectedItems() {
+                return Object.values(this.items).filter(item => item.selected)
+            },
+        },
+        mounted() {
+            this.isMounted = true
+        },
         created() {
-            this.items = this.generateItems()
+            if (this.$route.query.text) {
+                this.text = this.$route.query.text
+            }
+        },
+        watch: {
+            text(newValue) {
+                this.setWords(newValue)
+            }
         },
         methods: {
+            showDialog() {
+                this.textareaValue = ''
+                this.dialogShow = true
+                new Promise(resolve => {
+                    let interval = setInterval(() => {
+                        console.log(this.$refs.textarea)
+                        if (this.$refs.textarea) {
+                            clearInterval(interval)
+                            resolve()
+                        }
+                    }, 200)
+                }).then(() => {
+                    this.$refs.textarea.focus()
+                })
+                
+            },
+            setWords(text) {
+                this.loading = true
+                getSplitWords(text).then(res => {
+                    this.words = res.words
+                    this.items = this.generateItems()
+                    this.loading = false
+                })
+            },
             generateItems() {
                 let itemsObj = {}
                 this.words.map((item, index) => {
@@ -76,44 +123,96 @@
                 })
                 return itemsObj
             },
-            handleTouch(msg, event = '') {
-                console.log(msg)
-                console.log(event)
-            },
-
+            
             getItemByElement(element) {
                 return this.items[element.getAttribute('number')]
             },
             getElementIndex(element) {
                 return Number(element.getAttribute('number'))
             },
-
+            
+            isSelect(curIndex) {
+                /**
+                 * 选择模式下： 整体和局部都向前或向后滑动， 对元素进行选择操作
+                 * 取消模式下： 整体和局部不都向前或向后滑动， 对元素进行选择操作
+                 * 其他都是取消操作
+                 * */
+                if (curIndex === this.movePreviousIndex) {
+                    return this.selectMode
+                }
+                const isWholeMoveForward = curIndex - this.moveFirstIndex > 0
+                const isPartMoveForward = curIndex - this.movePreviousIndex > 0
+                return (((isWholeMoveForward && isPartMoveForward) || (!isWholeMoveForward && !isPartMoveForward)) && this.selectMode) || (isWholeMoveForward + isPartMoveForward === 1 && !this.selectMode)
+            },
+            
+            onClick(event) {
+                const index = this.getElementIndex(event.target)
+                this.items[index].selected = !this.items[index].selected
+            },
+            
             onTouchStart(event) {
                 const item = this.getItemByElement(event.target)
                 this.selectMode = !item.selected
-                this.startIndex = this.getElementIndex(event.target)
+                this.moveFirstIndex = this.getElementIndex(event.target)
+                this.movePreviousIndex = this.moveFirstIndex
             },
             onTouchMove(event) {
-                const {pageX, pageY} = event.targetTouches[0]
-                const touchElement = document.elementFromPoint(pageX, pageY)
+                const {clientX, clientY} = event.targetTouches[0]
+                const touchElement = document.elementFromPoint(clientX, clientY)
                 if (touchElement.hasAttribute('number')) {
-                    const endIndex = this.getElementIndex(touchElement)
-                    const [start, end] = endIndex >= this.startIndex ? [this.startIndex, endIndex] : [endIndex, this.startIndex]
+                    const curIndex = this.getElementIndex(touchElement)
+                    const [start, end] = curIndex > this.movePreviousIndex ? [this.movePreviousIndex, curIndex] : [curIndex, this.movePreviousIndex]
                     for (let i = start; i <= end; i++) {
-                        this.items[i].selected = this.selectMode
+                        this.items[i].selected = this.isSelect(curIndex)
                     }
-
+                    this.movePreviousIndex = curIndex
+                    
                 }
             },
-
-
+            setAllValue(value) {
+                Object.keys(this.items).map(key => {
+                    this.items[key].selected = value
+                })
+            },
+            selectAll() {
+                this.setAllValue(true)
+            },
+            inverseSelection() {
+                Object.keys(this.items).map(key => {
+                    this.items[key].selected = !this.items[key].selected
+                })
+            },
+            unselectAll() {
+                this.setAllValue(false)
+            },
+            copyText(event) {
+                const text = this.selectedItems
+                    .map(item => item.word)
+                    .join('')
+                if (text === '') {
+                    this.$toast.fail('复制内容为空')
+                    return
+                }
+                handleClipboard(
+                    text,
+                    event,
+                    () => {
+                        this.$toast.success('复制成功')
+                    },
+                    () => {
+                        this.$toast.fail('复制失败')
+                    },
+                )
+            },
+            
+            
         }
     }
 </script>
 
 <style scoped lang="scss">
     .container {
-        background-color: #f9f9f9;
+        background-color: rgb(93, 94, 96);
         display: flex;
         display: -webkit-flex;
         display: -moz-flex;
@@ -121,42 +220,54 @@
         justify-content: center;
         width: 100%;
         height: 100vh;
-
+        
         .content {
             width: 100%;
-
-            .header {
-                height: 10vh;
-                background-color: #5cb6ff;
+            
+            .van-button {
+                margin: 0 0.5rem;
+                width: 4.5rem;
+                height: 2rem;
             }
-
+            
+            .header {
+                text-align: center;
+            }
+            
             .main {
-                margin: 5px 5px;
-                max-height: 80vh;
+                margin: 4.5vh 0.35rem;
+                padding: 0 0.35rem;
+                max-height: 55vh;
                 min-height: 30vh;
-
+                overflow-y: auto;
+                
                 .van-tag {
-                    margin: 2.5px 2.5px;
+                    margin: 0.35rem;
+                    line-height: 1.5rem;
                 }
-
+                
                 .tag-selected {
-                    background-color: #ff4d4f;
+                    background-color: #F56C6C;
                     color: white;
                 }
-
+                
                 .tag-unselected {
                     background-color: white;
                     color: black;
-                    border: 1px solid rgb(128, 128, 128, 0.25);
                 }
             }
-
+            
             .footer {
-                height: 10vh;
-                background-color: #409EFF;
+                text-align: center;
+                height: 2rem;
             }
         }
-
+        
+        .van-loading {
+            z-index: 1;
+            position: absolute;
+            text-align: center;
+        }
     }
 
 </style>
