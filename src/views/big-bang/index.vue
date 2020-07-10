@@ -18,7 +18,9 @@
                         :number="index"
                         @touchstart="onTouchStart"
                         @touchmove.prevent="onTouchMove"
-                        @click="onClick"
+                        v-on-single-tap="onClick"
+                        v-on-double-tap="onDoubleClick"
+
                     >
                         {{item.word}}
                     </van-tag>
@@ -63,19 +65,20 @@
                 textareaValue: '',
                 text: '',
                 words: [],
-                items: {},
+                items: [],
                 moveFirstIndex: 0,
                 movePreviousIndex: 0,
                 selectMode: false,
                 dialogShow: false,
                 isMounted: false,
-                loading: false
+                loading: false,
+                clickedListener: {timer: null, clickedTimes: 1}
                 
             }
         },
         computed: {
             selectedItems() {
-                return Object.values(this.items).filter(item => item.selected)
+                return this.items.filter(item => item.selected)
             },
         },
         mounted() {
@@ -116,11 +119,9 @@
                 })
             },
             generateItems() {
-                let itemsObj = {}
-                this.words.map((item, index) => {
-                    itemsObj[index] = {word: item, selected: false}
+                return this.words.map((item) => {
+                    return {word: item, selected: false}
                 })
-                return itemsObj
             },
             
             getItemByElement(element) {
@@ -149,6 +150,19 @@
                 this.items[index].selected = !this.items[index].selected
             },
             
+            onDoubleClick(event) {
+                const index = this.getElementIndex(event.target)
+                const item = this.items[index]
+                if (item.word.length < 2) {
+                    return
+                }
+                const newItems = item.word.split('').map(item=>{
+                    return {word: item, selected: this.items[index].selected}
+                })
+                const splitItems = this.items.splice(index)
+                this.items = [...this.items, ...newItems, ...splitItems.slice(1)]
+            },
+            
             onTouchStart(event) {
                 const item = this.getItemByElement(event.target)
                 this.selectMode = !item.selected
@@ -169,17 +183,17 @@
                 }
             },
             setAllValue(value) {
-                Object.keys(this.items).map(key => {
-                    this.items[key].selected = value
-                })
+                for (let i=0; i<this.items.length; i++){
+                    this.items[i].selected = value
+                }
             },
             selectAll() {
                 this.setAllValue(true)
             },
             inverseSelection() {
-                Object.keys(this.items).map(key => {
-                    this.items[key].selected = !this.items[key].selected
-                })
+                for (let i=0; i<this.items.length; i++){
+                    this.items[i].selected = !this.items[i].selected
+                }
             },
             unselectAll() {
                 this.setAllValue(false)
