@@ -11,8 +11,7 @@ import './icons'  // 注册 svg-icon 全局组件
 import {Tag, Loading, Button, Dialog, Toast} from 'vant'
 import 'vant/lib/index.css';
 import loading from './directives/loading/directive'
-import VueFinger from './directives/vue-finger'
-
+import VueOnTouch from 'v-on-touch'
 Vue.use(Element)
 Vue.use(Loading)
 Vue.use(Tag)
@@ -20,7 +19,7 @@ Vue.use(Button)
 Vue.use(Dialog)
 Vue.use(Toast)
 Vue.use(loading)
-Vue.use(VueFinger)
+Vue.use(VueOnTouch)
 
 
 /**
