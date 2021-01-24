@@ -8,7 +8,7 @@ import { Message } from "element-ui"
 
 let config = {
     baseURL: process.env.VUE_APP_BASE_API || "",
-    timeout: 10 * 1000, // Timeout
+    timeout: 60 * 1000, // Timeout
     // withCredentials: true, // Check cross-site Access-Control
 };
 
